@@ -51,8 +51,13 @@ module.exports = function (content) {
 
     return "var path = '"+jsesc(filePath)+"';\n" +
         "var html = " + html + ";\n" +
-        (requireAngular ? "var angular = require('angular');\n" : "window.") +
-        "angular.module('" + ngModule + "').run(['$templateCache', function(c) { c.put(path, html) }]);\n" +
+        "var angular = " + (requireAngular ? "require('angular')" : "window.angular") + ";\n" +
+        "var injector = angular.element(document).injector();\n" +
+        "if (injector) {\n" +
+            "injector.get('$templateCache').put(path, html);\n" +
+        "} else {\n" +
+            "angular.module('" + ngModule + "').run(['$templateCache', function(c) { c.put(path, html) }]);\n" +
+        "}\n" +
         "module.exports = path;";
 
     function findQuote(content, backwards) {
